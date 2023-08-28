@@ -109,19 +109,30 @@ int main(void)
 
     std::cout << glGetString(GL_VERSION) << std::endl;
 
-    float positions[6] = {
+    float positions[12] = { // must be counter clock-wise
         -0.5f, -0.5f,
-         0.0f,  0.5f,
-         0.5f, -0.5f
+         0.5f, -0.5f,
+         0.5f,  0.5f,
+        -0.5f,  0.5f,
+    };
+
+    unsigned int indices[] = { // must be counter clock-wise
+        0, 1, 2,
+        2, 3, 0
     };
 
     unsigned int buffer;
     glGenBuffers(1, &buffer); // generate a buffer
     glBindBuffer(GL_ARRAY_BUFFER, buffer); // select (bind) the buffer
-    glBufferData(GL_ARRAY_BUFFER, 6 * sizeof(float), positions, GL_STATIC_DRAW); // create the buffer object with a specific size
+    glBufferData(GL_ARRAY_BUFFER, 6 * 2 * sizeof(float), positions, GL_STATIC_DRAW); // create the buffer object with a specific size
 
     glEnableVertexAttribArray(0);
     glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(float) * 2, 0);
+
+    unsigned int ibo; // index buffer object
+    glGenBuffers(1, &ibo); // generate a buffer
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo); // select (bind) the buffer
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, 6 * sizeof(unsigned int), indices, GL_STATIC_DRAW); // create the buffer object with a specific size
 
     ShaderProgramSource source = ParseShader("res/shaders/Basic.shader");
 
@@ -139,7 +150,8 @@ int main(void)
         /* Render here */
         glClear(GL_COLOR_BUFFER_BIT);
 
-        glDrawArrays(GL_TRIANGLES, 0, 3); // render primitives from array data
+        //glDrawArrays(GL_TRIANGLES, 0, 6); // render primitives from array data
+        glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr); // render primivites using index buffer
 
         /* Swap front and back buffers */
         glfwSwapBuffers(window);
