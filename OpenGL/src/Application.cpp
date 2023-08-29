@@ -5,6 +5,26 @@
 #include <string>
 #include <sstream>
 
+#define ASSERT(x) if (!(x)) __debugbreak(); // will only work with msvc 
+#define GLCall(x) GLClearError();\
+    x;\
+    ASSERT(GLLogCall(#x, __FILE__, __LINE__))
+
+
+static void GLClearError() {
+    while (glGetError() != GL_NO_ERROR) { // while glGetError !=0
+        //std::cout << "glGetError passed= " << std::endl;
+    } 
+}
+
+static bool GLLogCall(const char* function, const char* file, int line) {
+    while (GLenum error = glGetError()) { // while we have errors
+        std::cout << "[OpenGL Error] (" << error << ")" << function << " " << file << ": " << line << std::endl;
+        return false;
+    }
+    return true;
+}
+
 struct ShaderProgramSource {
     std::string VertexSource;
     std::string FragmentSource;
@@ -136,10 +156,12 @@ int main(void)
 
     ShaderProgramSource source = ParseShader("res/shaders/Basic.shader");
 
+    /*
     std::cout << "VERTEX" << std::endl;
     std::cout << source.VertexSource << std::endl;
     std::cout << "FRAGMENT" << std::endl;
     std::cout << source.FragmentSource << std::endl;
+    */
 
     unsigned int shader = CreateShader(source.VertexSource, source.FragmentSource);
     glUseProgram(shader);
@@ -149,9 +171,8 @@ int main(void)
     {
         /* Render here */
         glClear(GL_COLOR_BUFFER_BIT);
-
-        //glDrawArrays(GL_TRIANGLES, 0, 6); // render primitives from array data
-        glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr); // render primivites using index buffer
+        
+        GLCall(glDrawElements(GL_TRIANGLES, 6, GL_INT, nullptr)); // render primivites using index buffer
 
         /* Swap front and back buffers */
         glfwSwapBuffers(window);
