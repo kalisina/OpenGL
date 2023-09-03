@@ -8,7 +8,11 @@ void main()
 #shader fragment
 #version 330 core
 layout(location = 0) out vec4 color;
+
+uniform vec4 u_Color;
+
 void main()
 {
-  color = vec4(0.2, 0.3, 0.8, 1.0);
+  //color = vec4(0.2, 0.3, 0.8, 1.0); // set color using vertex buffer
+	color = u_Color; // set color using uniform
 };

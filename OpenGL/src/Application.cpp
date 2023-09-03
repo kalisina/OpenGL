@@ -123,6 +123,8 @@ int main(void)
     /* Make the window's context current */
     glfwMakeContextCurrent(window);
 
+    glfwSwapInterval(1); // synchronize the rendering of frames with the refresh rate of the monitor
+
     if (glewInit() != GLEW_OK) {
         std::cout << "Error with Glew Init" << std::endl;
     }
@@ -163,16 +165,37 @@ int main(void)
     std::cout << source.FragmentSource << std::endl;
     */
 
+    // Bind the shader
     unsigned int shader = CreateShader(source.VertexSource, source.FragmentSource);
     glUseProgram(shader);
 
+    // retrieve the location of the color
+    GLCall(int location = glGetUniformLocation(shader, "u_Color"));
+    ASSERT(location != -1);
+    GLCall(glUniform4f(location, 0.8f, 0.3f, 0.8f, 1.0f));  //Uniform4f means 4 floats, sets data to the shader
+
+    float r = 0.0f;
+    float increment = 0.05f;
     /* Loop until the user closes the window */
     while (!glfwWindowShouldClose(window))
     {
         /* Render here */
         glClear(GL_COLOR_BUFFER_BIT);
         
-        GLCall(glDrawElements(GL_TRIANGLES, 6, GL_INT, nullptr)); // render primivites using index buffer
+
+        GLCall(glUniform4f(location, r, 0.3f, 0.8f, 1.0f))
+
+        //GLCall(glDrawElements(GL_TRIANGLES, 6, GL_INT, nullptr)); // render primivites using index buffer (will break)
+        GLCall(glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr));
+
+        if (r > 1.0f) {
+            increment = -0.05f;
+        }
+        else if (r < 0.0f) {
+            increment = 0.05f;
+        }
+
+        r += increment;
 
         /* Swap front and back buffers */
         glfwSwapBuffers(window);
